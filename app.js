@@ -70,8 +70,12 @@ function downloadAsPng() {
 
   img.onload = () => {
     const canvas = document.createElement('canvas');
-    const drawWidth = (viewBox.width || img.naturalWidth) * scale;
-    const drawHeight = (viewBox.height || img.naturalHeight) * scale;
+    const svgWidth = viewBox.width || img.naturalWidth;
+    const svgHeight = viewBox.height || img.naturalHeight;
+    const maxLongSide = 2000;
+    const effectiveScale = Math.min(scale, (maxLongSide - padding * 2) / Math.max(svgWidth, svgHeight));
+    const drawWidth = svgWidth * effectiveScale;
+    const drawHeight = svgHeight * effectiveScale;
     canvas.width = drawWidth + padding * 2;
     canvas.height = drawHeight + padding * 2;
 
