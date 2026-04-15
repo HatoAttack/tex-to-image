@@ -5,12 +5,105 @@ const savePngBtn = document.getElementById('savePngBtn');
 const saveSvgBtn = document.getElementById('saveSvgBtn');
 const exampleButtons = document.querySelectorAll('.example-btn');
 
+// バックスラッシュが前置されていない単語を LaTeX コマンドへ変換する
+function preprocessTex(tex) {
+  const symbolMap = [
+    // ギリシャ文字（小文字）― var 系を先に処理して誤変換を防ぐ
+    ['varepsilon', '\\varepsilon'],
+    ['vartheta',   '\\vartheta'],
+    ['varsigma',   '\\varsigma'],
+    ['varphi',     '\\varphi'],
+    ['varpi',      '\\varpi'],
+    ['varrho',     '\\varrho'],
+    ['epsilon',    '\\epsilon'],
+    ['upsilon',    '\\upsilon'],
+    ['lambda',     '\\lambda'],
+    ['theta',      '\\theta'],
+    ['sigma',      '\\sigma'],
+    ['omega',      '\\omega'],
+    ['alpha',      '\\alpha'],
+    ['delta',      '\\delta'],
+    ['gamma',      '\\gamma'],
+    ['kappa',      '\\kappa'],
+    ['zeta',       '\\zeta'],
+    ['beta',       '\\beta'],
+    ['iota',       '\\iota'],
+    ['eta',        '\\eta'],
+    ['phi',        '\\phi'],
+    ['chi',        '\\chi'],
+    ['psi',        '\\psi'],
+    ['rho',        '\\rho'],
+    ['tau',        '\\tau'],
+    ['mu',         '\\mu'],
+    ['nu',         '\\nu'],
+    ['xi',         '\\xi'],
+    ['pi',         '\\pi'],
+    // ギリシャ文字（大文字）
+    ['Upsilon',    '\\Upsilon'],
+    ['Lambda',     '\\Lambda'],
+    ['Theta',      '\\Theta'],
+    ['Sigma',      '\\Sigma'],
+    ['Omega',      '\\Omega'],
+    ['Delta',      '\\Delta'],
+    ['Gamma',      '\\Gamma'],
+    ['Phi',        '\\Phi'],
+    ['Psi',        '\\Psi'],
+    ['Xi',         '\\Xi'],
+    ['Pi',         '\\Pi'],
+    // よく使う数学記号
+    ['infty',      '\\infty'],
+    ['nabla',      '\\nabla'],
+    ['partial',    '\\partial'],
+    ['forall',     '\\forall'],
+    ['exists',     '\\exists'],
+    // 演算子・関係記号
+    ['approx',     '\\approx'],
+    ['equiv',      '\\equiv'],
+    ['neq',        '\\neq'],
+    ['leq',        '\\leq'],
+    ['geq',        '\\geq'],
+    ['cdot',       '\\cdot'],
+    ['pm',         '\\pm'],
+    // 数学関数（長いものを先に）
+    ['arcsin',     '\\arcsin'],
+    ['arccos',     '\\arccos'],
+    ['arctan',     '\\arctan'],
+    ['sinh',       '\\sinh'],
+    ['cosh',       '\\cosh'],
+    ['tanh',       '\\tanh'],
+    ['sin',        '\\sin'],
+    ['cos',        '\\cos'],
+    ['tan',        '\\tan'],
+    ['cot',        '\\cot'],
+    ['sec',        '\\sec'],
+    ['csc',        '\\csc'],
+    ['log',        '\\log'],
+    ['ln',         '\\ln'],
+    ['exp',        '\\exp'],
+    ['lim',        '\\lim'],
+    ['max',        '\\max'],
+    ['min',        '\\min'],
+    ['sup',        '\\sup'],
+    ['inf',        '\\inf'],
+    ['det',        '\\det'],
+    ['gcd',        '\\gcd'],
+  ];
+
+  let result = tex;
+  for (const [name, command] of symbolMap) {
+    // バックスラッシュが直前にない単語境界でのみ置換する
+    const regex = new RegExp(`(?<!\\\\)\\b${name}\\b`, 'g');
+    result = result.replace(regex, command);
+  }
+  return result;
+}
+
 async function renderTex(tex) {
   if (!window.MathJax?.startup?.promise) return;
 
   try {
     await MathJax.startup.promise;
-    const wrappedTex = `\\displaystyle ${tex}`;
+    const wrappedTex = `\\displaystyle ${preprocessTex(tex)}`;
     const svgNode = await MathJax.tex2svgPromise(wrappedTex, { display: true });
     mathOutput.replaceChildren(svgNode);
     errorMessage.hidden = true;
